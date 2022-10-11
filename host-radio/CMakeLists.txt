@@ -74,6 +74,11 @@ FetchContent_MakeAvailable(fw-base)
 link_libraries(embedded-fw-base::libc)
 
 ###############
+# get the BlazeNet helpers
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../libs/blazenet-types
+    ${CMAKE_CURRENT_BINARY_DIR}/libs-blazenet-types EXCLUDE_FROM_ALL)
+
+###############
 # Set up the primary firmware target
 add_firmware_executable(NAME firmware FILENAME "blazenet-coordinator-rf-firmware"
     LDSCRIPT ${CMAKE_CURRENT_LIST_DIR}/efr32fg32b0xxf512.ld
@@ -131,3 +136,6 @@ target_link_libraries(firmware PRIVATE embedded-fw-base::FreeRTOS-CMSIS)
 target_link_libraries(firmware PRIVATE embedded-fw-base::efr32xg23-rail
     embedded-fw-base::efr32xg23-emdrv-spidrv embedded-fw-base::efr32xg23-emdrv-uartdrv
     embedded-fw-base::efr32xg23-emdrv-tempdrv embedded-fw-base::efr32xg23-se-manager)
+
+# BlazeNet support
+target_link_libraries(firmware PRIVATE blazenet::types)

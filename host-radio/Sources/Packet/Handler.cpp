@@ -1,6 +1,8 @@
 #include <rail.h>
 #include <stdlib.h>
 
+#include <BlazeNet/Types.h>
+
 #include "HostIf/Commands.h"
 #include "HostIf/IrqManager.h"
 #include "Log/Logger.h"
@@ -91,6 +93,14 @@ Handler::RxPacketBuffer *Handler::HandleRxPacket(const struct RAIL_RxPacketInfo 
     buffer->lqi = details.lqi;
 
     RAIL_CopyRxPacket(buffer->data, &info);
+
+    // inspect the header to see if we want auto-ack
+    if(buffer->packetSize >= sizeof(BlazeNet::Types::Mac::Header)) {
+        auto hdr = reinterpret_cast<const BlazeNet::Types::Mac::Header *>(buffer->data);
+
+        // TODO: also check if the address is one we acknowledge
+        buffer->autoAck = (hdr->flags & BlazeNet::Types::Mac::HeaderFlags::AckRequest);
+    }
 
     // enqueue it
     gRxQueue->emplace(buffer);

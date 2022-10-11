@@ -1,4 +1,5 @@
 #include <rail.h>
+#include <BlazeNet/Types.h>
 
 #include "HostIf/Commands.h"
 #include "Hw/Indicators.h"
@@ -386,7 +387,29 @@ bool Task::IsActive() {
  *         hurt devices, it _does_ violate a reasonable expectation, so don't do it.)
  */
 void Task::QueueAck(etl::span<const uint8_t> packet) {
-    // TODO: implement
+    // get packet header
+    REQUIRE(packet.size() >= sizeof(BlazeNet::Types::Mac::Header),
+            "can't ack undersize packet (%p:%u)", packet.data(), packet.size());
+
+    auto inHdr = reinterpret_cast<const BlazeNet::Types::Mac::Header *>(packet.data());
+
+    // build the ack packet
+    etl::array<uint8_t, sizeof(*inHdr)> buffer;
+    etl::fill(buffer.begin(), buffer.end(), 0);
+
+    auto ackHdr = reinterpret_cast<BlazeNet::Types::Mac::Header *>(buffer.data());
+
+    ackHdr->flags = BlazeNet::Types::Mac::HeaderFlags::EndpointAckResponse;
+
+    ackHdr->sequence = inHdr->sequence;
+    ackHdr->source = inHdr->destination;
+    ackHdr->destination = inHdr->source;
+
+    // queue it for transmission
+    auto tx = Packet::Handler::QueueTxPacket(Packet::Handler::TxPacketPriority::NetworkControl,
+            buffer);
+    REQUIRE(!tx, "failed to ack packet (src=%04x, tag=%02x): %s", inHdr->source, inHdr->sequence,
+            "failed to alloc tx buf");
 }
 
 /**
