@@ -26,6 +26,13 @@ namespace BlazeNet::Types::Mac {
 using ShortAddress = uint16_t;
 
 /**
+ * @brief Broadcast address
+ */
+constexpr static const ShortAddress kBroadcastAddress{0xffff};
+
+
+
+/**
  * @brief MAC header flags
  *
  * The flags field consists of a bitwise-OR of various flags in this enumeration.

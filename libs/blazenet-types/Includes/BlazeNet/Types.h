@@ -15,6 +15,11 @@
 #ifndef BLAZENET_TYPES_H
 #define BLAZENET_TYPES_H
 
+#include <BlazeNet/Types/Shared.h>
+
+#include <BlazeNet/Types/Phy.h>
 #include <BlazeNet/Types/Mac.h>
+
+#include <BlazeNet/Types/Beacon.h>
 
 #endif
