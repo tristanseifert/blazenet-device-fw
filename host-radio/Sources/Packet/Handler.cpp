@@ -85,6 +85,9 @@ Handler::RxPacketBuffer *Handler::HandleRxPacket(const struct RAIL_RxPacketInfo 
         return nullptr;
     }
 
+    memset(buffer, 0, sizeof(*buffer));
+    new (buffer) RxPacketBuffer();
+
     gRxAllocBytes += requiredBytes;
 
     // fill in the buffer
@@ -98,8 +101,11 @@ Handler::RxPacketBuffer *Handler::HandleRxPacket(const struct RAIL_RxPacketInfo 
     if(buffer->packetSize >= sizeof(BlazeNet::Types::Mac::Header)) {
         auto hdr = reinterpret_cast<const BlazeNet::Types::Mac::Header *>(buffer->data);
 
-        // TODO: also check if the address is one we acknowledge
-        buffer->autoAck = (hdr->flags & BlazeNet::Types::Mac::HeaderFlags::AckRequest);
+        // address should match our radio address
+        auto ourAddr = Radio::Task::GetAddress();
+
+        buffer->autoAck = (hdr->flags & BlazeNet::Types::Mac::HeaderFlags::AckRequest) &&
+            (hdr->destination == ourAddr);
     }
 
     // enqueue it
@@ -221,6 +227,7 @@ Handler::TxPacketBuffer *Handler::AllocTxPacket(etl::span<const uint8_t> payload
     gTxAllocBytes += requiredBytes;
 
     // buffer was allocated, so initialize it with the payload
+    memset(buffer, 0, sizeof(*buffer));
     new (buffer) TxPacketBuffer();
 
     buffer->packetSize = payload.size();
@@ -291,6 +298,11 @@ Handler::TxPacketBuffer *Handler::QueueTxPacket(const TxPacketPriority priority,
  */
 int Handler::QueueTxPacketFinal(TxQueueType *queue, TxPacketBuffer *buffer) {
     int err{0};
+
+    // clear state on sticky bit
+    if(buffer->isSticky) {
+        buffer->csmaFailCount = 0;
+    }
 
     // if there are no packets pending, skip the queue and transmit it right away
     if(!gTxPacketsPending++) {

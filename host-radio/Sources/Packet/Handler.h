@@ -100,7 +100,7 @@ class Handler {
             /**
              * @brief Size of the payload, in bytes
              */
-            uint16_t packetSize{};
+            uint16_t packetSize{0};
 
             /**
              * @brief Don't deallocate packet when discarding
@@ -140,14 +140,14 @@ class Handler {
              *
              * Size of the packet, in bytes
              */
-            uint16_t packetSize;
+            uint16_t packetSize{0};
 
             /**
              * @brief Received signal strength
              *
              * RSSI of the packet, in full integer dBm
              */
-            int8_t rssi;
+            int8_t rssi{0};
 
             /**
              * @brief Link quality indication
@@ -155,7 +155,7 @@ class Handler {
              * A relative value indicating the quality of the link on which the packet was
              * received, where 0 is really shitty and 255 is the absolute best.
              */
-            uint8_t lqi;
+            uint8_t lqi{0};
 
             /// Generate automatic acknowledgement when packet is read out
             uint8_t autoAck:1{0};
