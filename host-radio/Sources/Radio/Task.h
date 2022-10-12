@@ -85,6 +85,8 @@ class Task {
         static uint16_t GetChannel();
         static int SetTxPower(const int16_t newPower);
         static int16_t GetTxPower();
+        static int SetAddress(const uint16_t newAddress);
+        static uint16_t GetAddress();
 
         static bool IsActive();
 
@@ -134,6 +136,9 @@ class Task {
         static uint16_t gTxChannel;
         /// Last frame transmitted
         static Packet::Handler::TxPacketBuffer *gLastTx;
+
+        /// Short MAC address of the coordinator node
+        static uint16_t gAddress;
 };
 }
 

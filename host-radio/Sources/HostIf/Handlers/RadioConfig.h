@@ -45,7 +45,15 @@ struct RadioConfig {
             return err;
         }
 
-        Logger::Debug("RadioConfig: ch=%u, txpwr=%d", req->channel, req->txPower);
+        // update our short MAC address
+        err = Radio::Task::SetAddress(req->myAddress);
+        if(err) {
+            Logger::Warning("%s failed: %d", "RadioConfig set address", err);
+            return err;
+        }
+
+        Logger::Debug("RadioConfig: ch=%u, txpwr=%d, addr=$%04x", req->channel, req->txPower,
+                req->myAddress);
 
         return 0;
     }

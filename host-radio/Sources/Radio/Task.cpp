@@ -18,6 +18,7 @@ uint32_t Task::gCalibrationIr{0};
 
 size_t Task::gRxFifoOverflows{0}, Task::gRxFrameErrors{0}, Task::gRxFrames{0};
 
+uint16_t Task::gAddress{0};
 uint16_t Task::gTxChannel{UINT16_MAX};
 size_t Task::gTxFifoDrops{0}, Task::gTxCcaFails{0}, Task::gTxFrames{0};
 Packet::Handler::TxPacketBuffer *Task::gLastTx{nullptr};
@@ -360,6 +361,30 @@ int Task::SetTxPower(const int16_t newPower) {
 int16_t Task::GetTxPower() {
     auto level = RAIL_GetTxPower(gRail);
     return RAIL_ConvertRawToDbm(gRail, RAIL_TX_POWER_MODE_SUBGIG, level);
+}
+
+/**
+ * @brief Set the radio address
+ *
+ * This sets the short address of the radio.
+ */
+int Task::SetAddress(const uint16_t newAddress) {
+    // address may not be 0 or broadcast address
+    if(!newAddress || newAddress == 0xffff) {
+        return -1;
+    }
+
+    gAddress = newAddress;
+    // TODO: update address filtering
+
+    return 0;
+}
+
+/**
+ * @brief Get the current radio address
+ */
+uint16_t Task::GetAddress() {
+    return gAddress;
 }
 
 /**
